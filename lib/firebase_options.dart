@@ -67,6 +67,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '520079982833',
     projectId: 'wallpapers-cb36c',
     storageBucket: 'wallpapers-cb36c.appspot.com',
+    androidClientId: '520079982833-31598jnghsruroqql9jfqvgrbt7q7uu2.apps.googleusercontent.com',
+    iosClientId: '520079982833-55i16a33g183i3vr38681nsqqr0gogui.apps.googleusercontent.com',
     iosBundleId: 'com.example.walls',
   );
 
@@ -76,6 +78,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '520079982833',
     projectId: 'wallpapers-cb36c',
     storageBucket: 'wallpapers-cb36c.appspot.com',
+    androidClientId: '520079982833-31598jnghsruroqql9jfqvgrbt7q7uu2.apps.googleusercontent.com',
+    iosClientId: '520079982833-56t4238t7n6cue66rq38lf4adcc5qdat.apps.googleusercontent.com',
     iosBundleId: 'com.example.walls.RunnerTests',
   );
 }

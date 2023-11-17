@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 class ImageUploadScreen extends StatefulWidget {
+  final User user;
+
+  ImageUploadScreen(this.user);
+
   @override
   _ImageUploadScreenState createState() => _ImageUploadScreenState();
 }
@@ -14,74 +21,67 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   TextEditingController _imageUrlController = TextEditingController();
 
   Future<void> _uploadImage() async {
-  if (_image == null) {
-    // Handle no image selected
-    return;
-  }
+    if (_image == null) {
+      // Handle no image selected
+      return;
+    }
 
-  try {
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference storageReference = FirebaseStorage.instance.ref().child(fileName);
-    UploadTask uploadTask = storageReference.putFile(_image!);
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference storageReference = FirebaseStorage.instance.ref().child(fileName);
+      UploadTask uploadTask = storageReference.putFile(_image!);
 
-    // Show a loading indicator while uploading
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Uploading...'),
-              LinearProgressIndicator(),
-            ],
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Uploading...'),
+                LinearProgressIndicator(),
+              ],
+            ),
+          );
+        },
+      );
+
+      await uploadTask.whenComplete(() async {
+        String imageUrl = await storageReference.getDownloadURL();
+
+        await FirebaseFirestore.instance.collection('wallpapers').add({
+          'url': imageUrl,
+          'uploadedBy': widget.user.email, // Save the user's email
+          'timestamp': FieldValue.serverTimestamp(), // Save the upload timestamp
+        });
+
+        setState(() {
+          _image = null;
+          _imageUrlController.clear();
+        });
+
+        Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload successful!'),
+            duration: Duration(seconds: 2),
           ),
         );
-      },
-    );
-
-    await uploadTask.whenComplete(() async {
-      // Get the image URL from Firebase Storage
-      String imageUrl = await storageReference.getDownloadURL();
-
-      // Save the image URL to Firestore
-      await FirebaseFirestore.instance.collection('wallpapers').add({
-        'url': imageUrl,
-        // Add additional fields if needed (e.g., user ID, timestamp)
       });
-
-      // Clear the image selection and URL controller
-      setState(() {
-        _image = null;
-        _imageUrlController.clear();
-      });
-
-      // Close the loading indicator
+    } catch (error) {
       Navigator.pop(context);
 
-      // Show a success message
+      print('Error uploading image: $error');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Upload successful!'),
+          content: Text('Error uploading image'),
           duration: Duration(seconds: 2),
         ),
       );
-    });
-  } catch (error) {
-    // Handle errors
-    print('Error uploading image: $error');
-    // Close the loading indicator in case of an error
-    Navigator.pop(context);
-    // Show an error message or implement desired error handling
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error uploading image'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    }
   }
-}
-
 
   Widget _buildImagePicker() {
     return Column(
