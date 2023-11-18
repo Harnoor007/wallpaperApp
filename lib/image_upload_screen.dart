@@ -4,13 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
+import 'wallpapers_screen.dart';
 
 class ImageUploadScreen extends StatefulWidget {
   final User user;
 
-  ImageUploadScreen(this.user);
+  ImageUploadScreen({required this.user});
 
   @override
   _ImageUploadScreenState createState() => _ImageUploadScreenState();
@@ -19,6 +18,8 @@ class ImageUploadScreen extends StatefulWidget {
 class _ImageUploadScreenState extends State<ImageUploadScreen> {
   File? _image;
   TextEditingController _imageUrlController = TextEditingController();
+  bool _isImageSelected = false;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<void> _uploadImage() async {
     if (_image == null) {
@@ -51,13 +52,14 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
 
         await FirebaseFirestore.instance.collection('wallpapers').add({
           'url': imageUrl,
-          'uploadedBy': widget.user.email, // Save the user's email
-          'timestamp': FieldValue.serverTimestamp(), // Save the upload timestamp
+          'uploadedBy': widget.user.email,
+          'timestamp': FieldValue.serverTimestamp(),
         });
 
         setState(() {
           _image = null;
           _imageUrlController.clear();
+          _isImageSelected = false;
         });
 
         Navigator.pop(context);
@@ -86,17 +88,20 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   Widget _buildImagePicker() {
     return Column(
       children: [
-        ElevatedButton(
-          onPressed: () async {
-            final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-            if (pickedFile != null) {
-              setState(() {
-                _image = File(pickedFile.path);
-              });
-            }
-          },
-          child: Text('Pick Image'),
+              if (pickedFile != null) {
+                setState(() {
+                  _image = File(pickedFile.path);
+                  _isImageSelected = true;
+                });
+              }
+            },
+            child: Text('Pick Image'),
+          ),
         ),
         _image != null
             ? Image.file(
@@ -109,19 +114,58 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   }
 
   Widget _buildUploadButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        await _uploadImage();
-      },
-      child: Text('Upload Image'),
-    );
+    return _isImageSelected
+        ? ElevatedButton(
+            onPressed: () async {
+              await _uploadImage();
+            },
+            child: Text('Upload Image'),
+          )
+        : Container();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, // Add this line
       appBar: AppBar(
         title: Text('Upload Image'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              // Open the hamburger menu
+              _scaffoldKey.currentState?.openEndDrawer();
+            },
+          ),
+        ],
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(widget.user.displayName ?? ''),
+              accountEmail: Text(widget.user.email ?? ''),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: NetworkImage(widget.user.photoURL ?? ''),
+              ),
+            ),
+            ListTile(
+              title: Text('View Wallpapers'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushNamed(context, '/wallpapers');
+              },
+            ),
+            ListTile(
+              title: Text('Upload Image'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                // You can navigate to the upload screen if needed
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: Column(
@@ -136,3 +180,4 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
     );
   }
 }
+

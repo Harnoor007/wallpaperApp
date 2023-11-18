@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'image_upload_screen.dart';
+import 'wallpapers_screen.dart'; // Import the new file
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'firebase_options.dart'; 
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize Firebase
   await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,12 +24,30 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      // Add the 'routes' property and define your routes here
+      routes: {
+        '/wallpapers': (context) => WallpapersScreen(user: FirebaseAuth.instance.currentUser!), // Replace with the actual User object
+        '/upload': (context) => ImageUploadScreen(user: FirebaseAuth.instance.currentUser!), // Replace with the actual User object
+      },
+      home: StreamBuilder(
+        stream: _auth.authStateChanges(),
+        builder: (context, AsyncSnapshot<User?> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // or some loading indicator
+          }
+
+          if (snapshot.hasData) {
+            return WallpapersScreen(user: snapshot.data!);
+          } else {
+            return MySignInPage();
+          }
+        },
+      ),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MySignInPage extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<User?> _signInWithGoogle() async {
@@ -53,20 +73,15 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Wallpaper App'),
+        title: Text('Sign In'),
       ),
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
             User? user = await _signInWithGoogle();
-            if (user != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ImageUploadScreen(user)),
-              );
-            }
+            
           },
-          child: Text('Upload Image'),
+          child: Text('Sign In with Google'),
         ),
       ),
     );
