@@ -130,15 +130,25 @@ class MyWallpaperDetailScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.network(imageUrl),
+            // Display a loading indicator while the image is loading
+            FutureBuilder(
+              future: http.get(Uri.parse(imageUrl)), // Check if the image is reachable
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error loading image');
+                } else {
+                  return Image.network(imageUrl);
+                }
+              },
+            ),
             SizedBox(height: 20),
-          ],
+          ],  
         ),
       ),
     );
   }
-
-
 
 Future<void> _deleteWallpaper(BuildContext context) async {
   try {
@@ -193,7 +203,7 @@ Future<void> _deleteWallpaper(BuildContext context) async {
       );
 
       // Navigate back to the My Wallpapers list screen
-      Navigator.pop(context);
+      Navigator.of(context).pop();
     } else {
       // Show an error message if the document is not found
       ScaffoldMessenger.of(context).showSnackBar(
@@ -216,6 +226,7 @@ Future<void> _deleteWallpaper(BuildContext context) async {
     );
   }
 }
+
 
 }
 

@@ -101,14 +101,17 @@ class WallpaperList extends StatelessWidget {
           itemBuilder: (context, index) {
             var wallpaper = snapshot.data!.docs[index];
             var imageUrl = wallpaper['url'];
+            var uploadedBy = wallpaper['uploadedBy'];
 
             return GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        WallpaperDetailScreen(imageUrl: imageUrl),
+                    builder: (context) => WallpaperDetailScreen(
+                      imageUrl: imageUrl,
+                      uploadedBy: uploadedBy, // Pass the actual uploadedBy information
+                     ),
                   ),
                 );
               },
@@ -135,8 +138,9 @@ enum WallpaperLocation {
 
 class WallpaperDetailScreen extends StatelessWidget {
   final String imageUrl;
+  final String uploadedBy;
 
-  WallpaperDetailScreen({required this.imageUrl});
+  WallpaperDetailScreen({required this.imageUrl,required this.uploadedBy,});
 
 Future<void> _setWallpaper(BuildContext context, String imageUrl) async {
   try {
@@ -305,8 +309,8 @@ int _convertLocation(WallpaperLocation location) {
       ),
       body: SingleChildScrollView(
         child: Center(
-          child: Container( // Wrap with Container
-            height: MediaQuery.of(context).size.height, // or any other desired height
+          child: Container(
+            height: MediaQuery.of(context).size.height,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -318,6 +322,9 @@ int _convertLocation(WallpaperLocation location) {
                   ),
                   errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
+                SizedBox(height: 20),
+                // Display uploaded by information
+                Text('Uploaded by: $uploadedBy'),
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
