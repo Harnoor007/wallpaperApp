@@ -138,9 +138,19 @@ class WallpaperDetailScreen extends StatelessWidget {
 
   WallpaperDetailScreen({required this.imageUrl});
 
-  Future<void> _setWallpaper(BuildContext context, String imageUrl) async {
+Future<void> _setWallpaper(BuildContext context, String imageUrl) async {
   try {
-    // Fetch the image from the network
+    // Show loading indicator while fetching the image
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    // Fetch the image from the network in the background
     var imageBytes = await networkImageToByte(imageUrl);
 
     if (imageBytes == null) {
@@ -150,9 +160,40 @@ class WallpaperDetailScreen extends StatelessWidget {
     // Save the image to a temporary file
     File tempFile = await saveImageToTempFile(imageBytes);
 
+    // Close the loading indicator dialog
+    Navigator.pop(context);
+
     // Show dialog to choose wallpaper location
-    WallpaperLocation? selectedLocation =
-        await _showLocationDialog(context);
+    WallpaperLocation? selectedLocation = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Choose Wallpaper Location'),
+          content: Column(
+            children: [
+              ListTile(
+                title: Text('Home Screen'),
+                onTap: () {
+                  Navigator.pop(context, WallpaperLocation.HOME_SCREEN);
+                },
+              ),
+              ListTile(
+                title: Text('Lock Screen'),
+                onTap: () {
+                  Navigator.pop(context, WallpaperLocation.LOCK_SCREEN);
+                },
+              ),
+              ListTile(
+                title: Text('Both Screens'),
+                onTap: () {
+                  Navigator.pop(context, WallpaperLocation.BOTH_SCREENS);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
 
     if (selectedLocation != null) {
       // Set the image as wallpaper
@@ -192,6 +233,7 @@ class WallpaperDetailScreen extends StatelessWidget {
   }
 }
 
+
   Future<Uint8List?> networkImageToByte(String url) async {
     var response = await http.get(Uri.parse(url));
     return response.bodyBytes;
@@ -202,7 +244,7 @@ class WallpaperDetailScreen extends StatelessWidget {
     File tempFile = File('${tempDir.path}/temp_wallpaper.jpg');
     await tempFile.writeAsBytes(imageBytes);
     return tempFile;
-  }
+  } 
 
   Future<WallpaperLocation?> _showLocationDialog(BuildContext context) async {
     WallpaperLocation? selectedLocation;

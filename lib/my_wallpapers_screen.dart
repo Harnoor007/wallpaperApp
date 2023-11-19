@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:core';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MyWallpapersScreen extends StatelessWidget {
   final User user;
@@ -61,7 +62,7 @@ class WallpaperGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // You can adjust the number of columns as needed
+        crossAxisCount: 2,
         crossAxisSpacing: 8.0,
         mainAxisSpacing: 8.0,
       ),
@@ -70,7 +71,6 @@ class WallpaperGrid extends StatelessWidget {
         var wallpaper = wallpapers[index];
         var wallpaperData = wallpaper.data() as Map<String, dynamic>;
 
-        // Check if the required fields exist in the document
         if (wallpaperData.containsKey('url') &&
             wallpaperData.containsKey('timestamp')) {
           var imageUrl = wallpaperData['url'];
@@ -89,16 +89,18 @@ class WallpaperGrid extends StatelessWidget {
                 ),
               );
             },
-            child: Image.network(
-              imageUrl,
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
               fit: BoxFit.cover,
+              placeholder: (context, url) => Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => Icon(Icons.error),
             ),
           );
         } else {
-          // Display a more specific error message for debugging
           return ListTile(
             title: Text('Invalid Wallpaper Data: $wallpaperData'),
-            // You might want to provide a different UI or message for these cases
           );
         }
       },
