@@ -24,16 +24,24 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      darkTheme: ThemeData.dark().copyWith(
+        primaryColor: Colors.indigo,
+        colorScheme: ColorScheme.dark().copyWith(
+          secondary: Colors.pink,
+        ),
+        // Other theme configurations for dark mode
+      ),
+      themeMode: ThemeMode.system, // This makes the app follow the system theme
       // Add the 'routes' property and define your routes here
       routes: {
-        '/wallpapers': (context) => WallpapersScreen(user: FirebaseAuth.instance.currentUser!), // Replace with the actual User object
-        '/upload': (context) => ImageUploadScreen(user: FirebaseAuth.instance.currentUser!), // Replace with the actual User object
+        '/wallpapers': (context) => WallpapersScreen(user: FirebaseAuth.instance.currentUser!),
+        '/upload': (context) => ImageUploadScreen(user: FirebaseAuth.instance.currentUser!),
       },
       home: StreamBuilder(
         stream: _auth.authStateChanges(),
         builder: (context, AsyncSnapshot<User?> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // or some loading indicator
+            return CircularProgressIndicator();
           }
 
           if (snapshot.hasData) {
@@ -46,6 +54,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 
 class MySignInPage extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -76,14 +85,30 @@ class MySignInPage extends StatelessWidget {
         title: Text('Sign In'),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () async {
-            User? user = await _signInWithGoogle();
-            
-          },
-          child: Text('Sign In with Google'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/ic_launcher.png', // Replace with the actual path to your app icon
+              width: 100, // Adjust the size accordingly
+              height: 100,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Share and Explore amazing wallpapers.',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () async {
+                User? user = await _signInWithGoogle();
+              },
+              child: Text('Sign In with Google'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
