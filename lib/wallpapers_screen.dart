@@ -65,6 +65,13 @@ class WallpapersScreen extends StatelessWidget {
                 );
               },
             ),
+            ListTile(
+              title: Text('Follow Us'),
+              onTap: () {
+              Navigator.pop(context); // Close the drawer
+              Navigator.pushNamed(context, '/follow_us');
+              },
+            ),
           ],
         ),
       ),

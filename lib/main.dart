@@ -5,6 +5,7 @@ import 'wallpapers_screen.dart'; // Import the new file
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
+import 'follow_us.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/wallpapers': (context) => WallpapersScreen(user: FirebaseAuth.instance.currentUser!),
         '/upload': (context) => ImageUploadScreen(user: FirebaseAuth.instance.currentUser!),
+        '/follow_us': (context) => FollowUsScreen(), 
       },
       home: StreamBuilder(
         stream: _auth.authStateChanges(),

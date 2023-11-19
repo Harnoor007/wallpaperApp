@@ -13,22 +13,19 @@ class FollowUsScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => _launchURL('https://www.instagram.com/your_instagram_username/'),
+              onPressed: () => _launchURL('https://www.instagram.com/harnoor.29/'),
               child: Text('Follow on Instagram'),
             ),
-            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _launchURL('https://www.youtube.com/c/YourChannel'),
+              onPressed: () => _launchURL('https://www.youtube.com/'),
               child: Text('Subscribe on YouTube'),
             ),
-            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _launchURL('https://twitter.com/your_twitter_username'),
+              onPressed: () => _launchURL('https://twitter.com/'),
               child: Text('Follow on Twitter'),
             ),
-            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _launchURL('https://www.linkedin.com/in/your_linkedin_profile/'),
+              onPressed: () => _launchURL('https://www.linkedin.com/in/harnoorbirdi/'),
               child: Text('Connect on LinkedIn'),
             ),
           ],
@@ -37,12 +34,11 @@ class FollowUsScreen extends StatelessWidget {
     );
   }
 
-  _launchURL(String url) async {
+  Future<void> _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      throw 'Could not launch $url';
+      throw Exception('Could not launch $url');
     }
   }
 }
-
