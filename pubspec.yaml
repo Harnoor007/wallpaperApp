@@ -23,6 +23,7 @@ dependencies:
   flutter_wallpaper_manager: ^0.0.4
   http: ^1.1.0
   path_provider: ^2.1.1
+  cached_network_image: ^3.3.0
 
 dev_dependencies:
   flutter_test:

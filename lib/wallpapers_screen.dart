@@ -5,7 +5,10 @@ import 'package:flutter_wallpaper_manager/flutter_wallpaper_manager.dart';
 import 'dart:typed_data';   
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'my_wallpapers_screen.dart';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
+
 class WallpapersScreen extends StatelessWidget {
   final User user;
 
@@ -50,6 +53,18 @@ class WallpapersScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/upload');
               },
             ),
+            ListTile(
+              title: Text('My Wallpapers'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyWallpapersScreen(user: user),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -88,18 +103,22 @@ class WallpaperList extends StatelessWidget {
             var imageUrl = wallpaper['url'];
 
             return GestureDetector(
-                onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WallpaperDetailScreen(imageUrl: imageUrl),
-            ),
-          );
-        },
-
-              child: Image.network(
-                imageUrl,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        WallpaperDetailScreen(imageUrl: imageUrl),
+                  ),
+                );
+              },
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) => Icon(Icons.error),
               ),
             );
           },
@@ -242,19 +261,31 @@ int _convertLocation(WallpaperLocation location) {
       appBar: AppBar(
         title: Text('Wallpaper Detail'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.network(imageUrl),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await _setWallpaper(context, imageUrl);
-              },
-              child: Text('Set as Wallpaper'),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container( // Wrap with Container
+            height: MediaQuery.of(context).size.height, // or any other desired height
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _setWallpaper(context, imageUrl);
+                  },
+                  child: Text('Set as Wallpaper'),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -127,45 +127,9 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Add this line
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Upload Image'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              // Open the hamburger menu
-              _scaffoldKey.currentState?.openEndDrawer();
-            },
-          ),
-        ],
-      ),
-      endDrawer: Drawer(
-        child: ListView(
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(widget.user.displayName ?? ''),
-              accountEmail: Text(widget.user.email ?? ''),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(widget.user.photoURL ?? ''),
-              ),
-            ),
-            ListTile(
-              title: Text('View Wallpapers'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                Navigator.pushNamed(context, '/wallpapers');
-              },
-            ),
-            ListTile(
-              title: Text('Upload Image'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // You can navigate to the upload screen if needed
-              },
-            ),
-          ],
-        ),
       ),
       body: Center(
         child: Column(
@@ -180,4 +144,3 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
     );
   }
 }
-
