@@ -6,6 +6,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
 import 'follow_us.dart'; 
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

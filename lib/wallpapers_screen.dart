@@ -8,11 +8,30 @@ import 'package:path_provider/path_provider.dart';
 import 'my_wallpapers_screen.dart';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 class WallpapersScreen extends StatelessWidget {
   final User user;
 
   WallpapersScreen({required this.user});
+ 
+  Future<void> _signOut(BuildContext context) async {
+  try {
+    // Sign out from Firebase
+    await FirebaseAuth.instance.signOut();
+
+    // Clear the authentication state using google_sign_in
+    await GoogleSignIn().signOut();
+
+    // Navigate back to the sign-in screen or any other appropriate screen
+    Navigator.pop(context);
+  } catch (e) {
+    print('Error signing out: $e');
+    // Handle error, show a snackbar, etc.
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -31,50 +50,59 @@ class WallpapersScreen extends StatelessWidget {
         ],
       ),
       endDrawer: Drawer(
-        child: ListView(
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(user.displayName ?? ''),
-              accountEmail: Text(user.email ?? ''),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(user.photoURL ?? ''),
-              ),
-            ),
-            ListTile(
-              title: Text('View Wallpapers'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text('Upload Image'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/upload');
-              },
-            ),
-            ListTile(
-              title: Text('My Wallpapers'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyWallpapersScreen(user: user),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Follow Us'),
-              onTap: () {
-              Navigator.pop(context); // Close the drawer
-              Navigator.pushNamed(context, '/follow_us');
-              },
-            ),
-          ],
+  child: ListView(
+    children: [
+      UserAccountsDrawerHeader(
+        accountName: Text(user.displayName ?? ''),
+        accountEmail: Text(user.email ?? ''),
+        currentAccountPicture: CircleAvatar(
+          backgroundImage: NetworkImage(user.photoURL ?? ''),
         ),
       ),
+      ListTile(
+        title: Text('View Wallpapers'),
+        onTap: () {
+          Navigator.pop(context);
+        },
+      ),
+      ListTile(
+        title: Text('Upload Image'),
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.pushNamed(context, '/upload');
+        },
+      ),
+      ListTile(
+        title: Text('My Wallpapers'),
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyWallpapersScreen(user: user),
+            ),
+          );
+        },
+      ),
+      ListTile(
+        title: Text('Follow Us'),
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.pushNamed(context, '/follow_us');
+        },
+      ),
+      // Add the sign-out option
+      ListTile(
+        title: Text('Sign Out'),
+        onTap: () async {
+          // Call the sign-out function
+          await _signOut(context);
+        },
+      ),
+    ],
+  ),
+),
+
       body: WallpaperList(),
     );
   }
